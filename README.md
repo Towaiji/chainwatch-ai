@@ -6,9 +6,9 @@ ChainWatch AI is a modular suite of specialized AI agents developed for the Fetc
 
 ## Agents
 
-- **PriceAgent**: Provides real-time (mocked) crypto price data.
-- **NewsAgent**: Aggregates and displays top crypto news headlines.
-- **AlertAgent**: Sends alerts when certain price thresholds are reached.
+- **PriceAgent**: Provides real-time (mocked) crypto price data. https://agentverse.ai/agents/details/agent1qtws5svef9sd2wx6qxnallkxz9a47h6n2008tkl2c6xx4cshu8jf62wapl8/profile
+- **NewsAgent**: Aggregates and displays top crypto news headlines. https://agentverse.ai/agents/details/agent1qg0ajn45y42vnj3qjgs4rupzd0h7kppxlyzzyx6a0eg6px3xtnja2gnwr05/profile
+- **AlertAgent**: Sends alerts when certain price thresholds are reached. https://agentverse.ai/agents/details/agent1qfhsk62u4cdc5mh6xglg4kwyu8ddqgpjsckvqjwfgvp0qcqyvqz4xckqxnt/profile
 - **AssistantAgent**: Acts as a personalized assistant that processes user messages and is built to dynamically connect with other agents on Agentverse.
 
 ## Features
