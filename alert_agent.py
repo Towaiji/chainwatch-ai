@@ -1,41 +1,28 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from uagents import Agent, Context, Bureau
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
+import uvicorn
 
-# Define the request schema
-class QueryRequest(BaseModel):
-    query: str
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Starting up AlertAgent...")
+    # Initialize any resources needed for alerts
+    yield
+    # Cleanup resources when shutting down
+    print("Shutting down AlertAgent...")
 
-# Create the FastAPI app
-app = FastAPI()
+# Create the FastAPI app with the lifespan handler
+app = FastAPI(lifespan=lifespan)
 
-# Define the agent address
-ALERT_AGENT_ADDR = "agent1qfhsk62u4cdc5mh6xglg4kwyu8ddqgpjsckvqjwfgvp0qcqyvqz4xckqxnt"
+@app.get("/alert")
+async def get_alert():
+    """
+    Endpoint to get a simulated price alert.
+    """
+    # In a real scenario, this could be dynamic based on conditions.
+    return {
+        "alert": "Price threshold reached: BTC has dropped below your set threshold."
+    }
 
-# Create the Agent
-agent = Agent(name="AlertAgent", seed="alertagent")
-
-# Define the startup event
-@app.on_event("startup")
-async def startup():
-    # Start the agent
-    agent.run()
-    print("📡 AlertAgent is online!")
-
-# Endpoint to handle the query
-@app.post("/submit")
-async def submit_query(query: QueryRequest):
-    # Example: Here you need to handle the logic for setting alerts
-    if "alert" in query.query.lower():
-        # Example logic for alerts
-        return {"alert": "Alert set for Bitcoin price drop."}  # Replace with actual logic for alert setting
-    else:
-        raise HTTPException(status_code=400, detail="Unknown query type")
-
-# Add the agent to the bureau
-bureau = Bureau()
-bureau.add(agent)
-
-# Run the Bureau on port 8003
 if __name__ == "__main__":
-    bureau.run()  # This will start the agent on port 8000 internally (no need to pass host and port)
+    # Run the FastAPI app with uvicorn on port 8002
+    uvicorn.run("alert_agent:app", host="0.0.0.0", port=8002, reload=True)
