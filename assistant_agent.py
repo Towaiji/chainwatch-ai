@@ -1,41 +1,25 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from uagents import Agent, Context, Bureau
+from fastapi import FastAPI, Query
+from contextlib import asynccontextmanager
+import uvicorn
 
-# Define the request schema
-class QueryRequest(BaseModel):
-    query: str
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Starting up AssistantAgent...")
+    # Insert any startup tasks here
+    yield
+    # Insert any shutdown/cleanup tasks here
+    print("Shutting down AssistantAgent...")
 
-# Create the FastAPI app
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
-# Define the agent address
-ASSISTANT_AGENT_ADDR = "agent1qdx3tckuw3krnl6vjj2s5q478ehrpq5klwarmzzms2729x85fmcpx7ezdgm"
+@app.get("/assistant")
+async def get_assistant(message: str = Query("Hello", description="Message for the assistant")):
+    """
+    Endpoint to interact with the Assistant Agent.
+    Returns a simple echo response for demonstration.
+    """
+    return {"response": f"Assistant received your message: '{message}'"}
 
-# Create the Agent
-agent = Agent(name="AssistantAgent", seed="assistantagent")
-
-# Define the startup event
-@app.on_event("startup")
-async def startup():
-    # Start the agent
-    agent.run()
-    print("🤖 AssistantAgent is ready!")
-
-# Endpoint to handle the query
-@app.post("/submit")
-async def submit_query(query: QueryRequest):
-    # Example: Here you need to handle the logic for tasks and other assistant functionalities
-    if "tasks" in query.query.lower():
-        # Example logic for tasks
-        return {"tasks": "Task 1: Complete the project."}  # Replace with actual logic for tasks
-    else:
-        raise HTTPException(status_code=400, detail="Unknown query type")
-
-# Add the agent to the bureau
-bureau = Bureau()
-bureau.add(agent)
-
-# Run the Bureau on port 8004
 if __name__ == "__main__":
-    bureau.run()  # This will start the agent on port 8000 internally (no need to pass host and port)
+    # Run the FastAPI app with uvicorn on port 8003
+    uvicorn.run("assistant_agent:app", host="0.0.0.0", port=8003, reload=True)
