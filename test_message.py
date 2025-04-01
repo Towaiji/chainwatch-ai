@@ -1,29 +1,36 @@
-import httpx
+import requests
 
-AGENTS = {
-    "PriceAgent": "http://127.0.0.1:8001",
-    "NewsAgent": "http://127.0.0.1:8002",
-    "AlertAgent": "http://127.0.0.1:8003",
-    "AssistantAgent": "http://127.0.0.1:8004"
-}
-
-# Send a test message to all agents
-async def send_message(agent_name, query):
-    url = f"{AGENTS[agent_name]}/submit"
-    data = {"query": query}
-    
+def test_price_agent():
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(url, json=data)
-            if response.status_code == 200:
-                print(f"Response from {agent_name}: {response.json()}")
-            else:
-                print(f"❌ Response from {agent_name}: {response.status_code} - {response.text}")
-                if response.status_code == 500:
-                    print(f"Error Details: {response.json()}")
+        response = requests.get("http://localhost:8000/price")
+        print("PriceAgent response:", response.json())
     except Exception as e:
-        print(f"Error sending message to {agent_name}: {e}")
+        print("Error sending message to PriceAgent:", e)
 
-# Example test
-import asyncio
-asyncio.run(send_message("PriceAgent", "What is the price of Bitcoin?"))
+def test_news_agent():
+    try:
+        response = requests.get("http://localhost:8001/news")
+        print("NewsAgent response:", response.json())
+    except Exception as e:
+        print("Error sending message to NewsAgent:", e)
+
+def test_alert_agent():
+    try:
+        response = requests.get("http://localhost:8002/alert")
+        print("AlertAgent response:", response.json())
+    except Exception as e:
+        print("Error sending message to AlertAgent:", e)
+
+def test_assistant_agent():
+    try:
+        # Provide a sample message as a query parameter
+        response = requests.get("http://localhost:8003/assistant", params={"message": "How can you help me?"})
+        print("AssistantAgent response:", response.json())
+    except Exception as e:
+        print("Error sending message to AssistantAgent:", e)
+
+if __name__ == "__main__":
+    test_price_agent()
+    test_news_agent()
+    test_alert_agent()
+    test_assistant_agent()
