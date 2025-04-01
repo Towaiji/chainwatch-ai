@@ -83,3 +83,6 @@ This project is licensed under the MIT License.
 ---
 
 ChainWatch AI is built for the Fetch.ai Hackathon at Techkriti'25, IIT Kanpur. I appreciate your interest and look forward to your feedback!
+
+https://devpost.com/software/chainwatch-ai?ref_content=my-projects-tab&ref_feature=my_projects 
+you are welcome to visit my submission on DevPost where you can watch the demo video!
