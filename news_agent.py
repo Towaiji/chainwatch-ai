@@ -1,41 +1,32 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from uagents import Agent, Context, Bureau
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
+import uvicorn
 
-# Define the request schema
-class QueryRequest(BaseModel):
-    query: str
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Starting up NewsAgent...")
+    # Perform any startup tasks here (e.g., initializing API clients)
+    yield
+    # Perform any cleanup tasks here
+    print("Shutting down NewsAgent...")
 
-# Create the FastAPI app
-app = FastAPI()
+# Create the FastAPI app with the lifespan handler
+app = FastAPI(lifespan=lifespan)
 
-# Define the agent address
-NEWS_AGENT_ADDR = "agent1qdy6ux98w630pj3d6neypwym00fzsxj43vavxcygqgklw9acsjae62sm6k4"
+@app.get("/news")
+async def get_news():
+    """
+    Endpoint to get top crypto news headlines.
+    """
+    # Example mock news headlines
+    return {
+        "headlines": [
+            "Crypto Market Reaches New Highs",
+            "New Regulations Impact Crypto Trading",
+            "Major Partnership Announced in Blockchain Space"
+        ]
+    }
 
-# Create the Agent
-agent = Agent(name="NewsAgent", seed="newsagent")
-
-# Define the startup event
-@app.on_event("startup")
-async def startup():
-    # Start the agent
-    agent.run()
-    print("📰 NewsAgent is live!")
-
-# Endpoint to handle the query
-@app.post("/submit")
-async def submit_query(query: QueryRequest):
-    # Example: Here you need to handle the logic for news
-    if "news" in query.query.lower():
-        # Example logic for returning news
-        return {"news": "Crypto news goes here"}  # Replace with actual logic for news retrieval
-    else:
-        raise HTTPException(status_code=400, detail="Unknown query type")
-
-# Add the agent to the bureau
-bureau = Bureau()
-bureau.add(agent)
-
-# Run the Bureau on port 8002
 if __name__ == "__main__":
-    bureau.run()  # This will start the agent on port 8000 internally (no need to pass host and port)
+    # Run the FastAPI app with uvicorn on port 8001
+    uvicorn.run("news_agent:app", host="0.0.0.0", port=8001, reload=True)
