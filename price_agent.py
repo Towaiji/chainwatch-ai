@@ -1,25 +1,29 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import uvicorn
+import requests
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup logic
-    print("Starting up PriceAgent...")
+    print("Starting up PriceAgent with CoinGecko data...")
     yield
-    # Shutdown logic
     print("Shutting down PriceAgent...")
 
-# Pass the lifespan function to the FastAPI constructor.
 app = FastAPI(lifespan=lifespan)
 
 @app.get("/price")
 async def get_price():
     """
-    Endpoint to get mock price data.
+    Fetches the current BTC price (USD) from CoinGecko.
     """
-    return {"BTC": "50000", "ETH": "4000"}
+    try:
+        url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
+        response = requests.get(url)
+        data = response.json()
+        btc_price = data["bitcoin"]["usd"]
+        return {"BTC": btc_price}
+    except Exception as e:
+        return {"error": str(e)}
 
 if __name__ == "__main__":
-    # Run the FastAPI app with uvicorn on port 8000
     uvicorn.run("price_agent:app", host="0.0.0.0", port=8000, reload=True)

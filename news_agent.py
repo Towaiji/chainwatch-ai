@@ -1,32 +1,35 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import uvicorn
+import os
+import requests
+
+NEWS_API_KEY = os.environ.get("NEWS_API_KEY")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Starting up NewsAgent...")
-    # Perform any startup tasks here (e.g., initializing API clients)
+    print("Starting up NewsAgent with NewsAPI data...")
     yield
-    # Perform any cleanup tasks here
     print("Shutting down NewsAgent...")
 
-# Create the FastAPI app with the lifespan handler
 app = FastAPI(lifespan=lifespan)
 
 @app.get("/news")
 async def get_news():
     """
-    Endpoint to get top crypto news headlines.
+    Fetches top crypto-related headlines from NewsAPI.
     """
-    # Example mock news headlines
-    return {
-        "headlines": [
-            "Crypto Market Reaches New Highs",
-            "New Regulations Impact Crypto Trading",
-            "Major Partnership Announced in Blockchain Space"
-        ]
-    }
+    if not NEWS_API_KEY:
+        return {"error": "NEWS_API_KEY not set. Please set your environment variable."}
+    try:
+        url = f"https://newsapi.org/v2/everything?q=crypto&sortBy=publishedAt&apiKey={NEWS_API_KEY}"
+        response = requests.get(url)
+        data = response.json()
+        articles = data.get("articles", [])
+        headlines = [article["title"] for article in articles[:3]]
+        return {"headlines": headlines}
+    except Exception as e:
+        return {"error": str(e)}
 
 if __name__ == "__main__":
-    # Run the FastAPI app with uvicorn on port 8001
     uvicorn.run("news_agent:app", host="0.0.0.0", port=8001, reload=True)

@@ -23,8 +23,7 @@ def test_alert_agent():
 
 def test_assistant_agent():
     try:
-        # Provide a sample message as a query parameter
-        response = requests.get("http://localhost:8003/assistant", params={"message": "How can you help me?"})
+        response = requests.get("http://localhost:8003/assistant", params={"message": "What is the price of BTC and crypto news?"})
         print("AssistantAgent response:", response.json())
     except Exception as e:
         print("Error sending message to AssistantAgent:", e)
