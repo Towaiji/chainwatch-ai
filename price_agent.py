@@ -1,7 +1,20 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from contextlib import asynccontextmanager
 import uvicorn
 import requests
+
+# Map common coin symbols to CoinGecko coin IDs.
+coin_mapping = {
+    "btc": "bitcoin",
+    "eth": "ethereum",
+    "ltc": "litecoin",
+    "xrp": "ripple",
+    "bch": "bitcoin-cash",
+    "ada": "cardano",
+    "dot": "polkadot",
+    "sol": "solana",
+    "doge": "dogecoin"
+}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -12,16 +25,22 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 @app.get("/price")
-async def get_price():
+async def get_price(coin: str = Query("btc", description="The symbol of the cryptocurrency (e.g. btc, eth, ltc)")):
     """
-    Fetches the current BTC price (USD) from CoinGecko.
+    Fetches the current coin price (USD) from CoinGecko.
     """
+    coin_lower = coin.lower()
+    # Use mapping if available, else assume coin_lower is already the correct ID.
+    coin_id = coin_mapping.get(coin_lower, coin_lower)
     try:
-        url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
+        url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_id}&vs_currencies=usd"
         response = requests.get(url)
         data = response.json()
-        btc_price = data["bitcoin"]["usd"]
-        return {"BTC": btc_price}
+        if coin_id in data:
+            price = data[coin_id]["usd"]
+            return { coin.upper(): price }
+        else:
+            return {"error": f"Price for {coin} not found."}
     except Exception as e:
         return {"error": str(e)}
 
