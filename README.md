@@ -2,87 +2,119 @@
 
 ![tag : innovationlab](https://img.shields.io/badge/innovationlab-3D8BD3)
 
-ChainWatch AI is a modular suite of specialized AI agents developed for the Fetch.ai Hackathon at Techkriti'25, IIT Kanpur. This project demonstrates a network of micro-agents that interact to deliver critical insights and notifications for the crypto domain. Each agent is designed for a specific task and can be easily extended or integrated with live data sources.
+ChainWatch AI is a modular suite of specialized AI agents designed for real-time crypto data and news. Developed for the Fetch.ai Hackathon at Techkriti'25, IIT Kanpur, it demonstrates how multiple microservices can work together to deliver actionable insights. The project now supports querying the price of any cryptocurrency (e.g., BTC, ETH, LTC) and aggregates crypto news using live APIs.
 
-## Agents
+## Agents Overview
+  
+- **PriceAgent:**  
+  Retrieves live cryptocurrency prices using CoinGecko. You can request any coin by passing a query parameter (e.g., `?coin=eth`).  
+  _Endpoint:_ [http://localhost:8000/price](http://localhost:8000/price)  
+  _Example:_ [http://localhost:8000/price?coin=btc](http://localhost:8000/price?coin=btc)  
+  [&#8203;:contentReference[oaicite:0]{index=0}]
+  https://agentverse.ai/agents/details/agent1qtws5svef9sd2wx6qxnallkxz9a47h6n2008tkl2c6xx4cshu8jf62wapl8/profile
 
-- **PriceAgent**: Provides real-time (mocked) crypto price data. 
-https://agentverse.ai/agents/details/agent1qtws5svef9sd2wx6qxnallkxz9a47h6n2008tkl2c6xx4cshu8jf62wapl8/profile
-- **NewsAgent**: Aggregates and displays top crypto news headlines. 
-https://agentverse.ai/agents/details/agent1qg0ajn45y42vnj3qjgs4rupzd0h7kppxlyzzyx6a0eg6px3xtnja2gnwr05/profile
-- **AlertAgent**: Sends alerts when certain price thresholds are reached. 
-https://agentverse.ai/agents/details/agent1qfhsk62u4cdc5mh6xglg4kwyu8ddqgpjsckvqjwfgvp0qcqyvqz4xckqxnt/profile
-- **AssistantAgent**: Acts as a personalized assistant that processes user messages and is built to dynamically connect with other agents on Agentverse.
+- **NewsAgent:**  
+  Aggregates top crypto news headlines using the NewsAPI.  
+  _Endpoint:_ [http://localhost:8001/news](http://localhost:8001/news)  
+  **Note:** Set your `NEWS_API_KEY` as an environment variable.  
+  [&#8203;:contentReference[oaicite:1]{index=1}]
+  https://agentverse.ai/agents/details/agent1qg0ajn45y42vnj3qjgs4rupzd0h7kppxlyzzyx6a0eg6px3xtnja2gnwr05/profile
 
-## Features
+- **AlertAgent:**  
+  Provides a simulated alert message regarding crypto price thresholds.  
+  _Endpoint:_ [http://localhost:8002/alert](http://localhost:8002/alert)  
+  [&#8203;:contentReference[oaicite:2]{index=2}]
+  https://agentverse.ai/agents/details/agent1qfhsk62u4cdc5mh6xglg4kwyu8ddqgpjsckvqjwfgvp0qcqyvqz4xckqxnt/profile
 
-- **Modular Design**: Each agent functions as an independent microservice.
-- **Agentverse Integration Ready**: Built to be registered on Agentverse for seamless agent interaction.
-- **Proof-of-Concept Focus**: Uses hardcoded (mock) data as a placeholder with plans to integrate live APIs (e.g., crypto price feeds, news sources) in future iterations.
-- **Ease of Deployment**: Agents are deployed using FastAPI and uvicorn, making them lightweight and easy to run.
+- **AssistantAgent:**  
+  Acts as a central coordinator by analyzing user queries. Based on the query, it:
+  - Detects a coin symbol (BTC, ETH, etc.) and forwards the request to PriceAgent.
+  - Fetches crypto news from NewsAgent.
+  - Retrieves alerts from AlertAgent when requested.
+  
+  _Endpoint:_ [http://localhost:8003/assistant?message=YourQuery](http://localhost:8003/assistant?message=YourQuery)  
+  [&#8203;:contentReference[oaicite:3]{index=3}]
 
-## Architecture
+## Front End
 
-Each agent is implemented as a FastAPI service using the new lifespan event handler pattern:
+A simple, polished front end (`index.html`) is provided to interact with the AssistantAgent. It features:
+- A clean UI with a text input and a send button.
+- Dynamic display of responses (price data, news headlines, and alerts) in a user-friendly format.
 
-- **PriceAgent**: Runs on port 8000.
-- **NewsAgent**: Runs on port 8001.
-- **AlertAgent**: Runs on port 8002.
-- **AssistantAgent**: Runs on port 8003.
-
-They communicate with clients via REST endpoints and are designed for easy expansion into a full-fledged network of collaborating agents.
+Open `index.html` via a local server (e.g., using `python3 -m http.server 5500`) to avoid CORS issues.
 
 ## Installation
 
 1. **Clone the Repository:**
    git clone https://github.com/Towaiji/chainwatch-ai.git
    cd chainwatch-ai
+Set Up a Virtual Environment (Recommended):
 
-2. **Set Up a Virtual Environment (Optional but Recommended):**
-   python3 -m venv venv
-   source venv/bin/activate  # Windows: venv\Scripts\activate
+python3 -m venv venv
+source venv/bin/activate   # On Windows: venv\Scripts\activate
+Install Dependencies:
 
-3. **Install Dependencies:**
-   pip install -r requirements.txt
-   *Ensure you have FastAPI, uvicorn, and requests installed.*
+pip install -r requirements.txt
+Ensure you have FastAPI, uvicorn, and requests installed.
 
-## Usage
+Set Your NewsAPI Key:
 
-Start each agent in its own terminal window:
+export NEWS_API_KEY=your_newsapi_key_here
+(On Windows, use the appropriate command for setting environment variables.)
 
-- **PriceAgent:**
-  python3 price_agent.py
+Running the Agents
+Open separate terminal windows/tabs and run the following commands:
 
-- **NewsAgent:**
-  python3 news_agent.py
+PriceAgent (Port 8000):
 
-- **AlertAgent:**
-  python3 alert_agent.py
+python3 price_agent.py
+NewsAgent (Port 8001):
 
-- **AssistantAgent:**
-  python3 assistant_agent.py
+python3 news_agent.py
+AlertAgent (Port 8002):
 
-To quickly test that all agents are running and responding, use the provided test script:
+python3 alert_agent.py
+AssistantAgent (Port 8003):
+
+python3 assistant_agent.py
+Testing the System
+You can test the agents individually or as a whole:
+
+Directly via Browser:
+
+PriceAgent: http://localhost:8000/price?coin=eth
+
+NewsAgent: http://localhost:8001/news
+
+AlertAgent: http://localhost:8002/alert
+
+AssistantAgent: http://localhost:8003/assistant?message=What%20is%20the%20price%20of%20BTC%20and%20crypto%20news?
+
+Using the Test Script: Run the provided test_message.py:
+
 python3 test_message.py
-This script sends HTTP GET requests to each agent and prints the JSON responses.
+This script sends requests to each agent and prints their responses.
 
-## Future Improvements
+Using the Front End: Serve index.html on a local web server:
 
-- **Live Data Integration**: Replace hardcoded data with live API calls for crypto prices and news.
-- **Enhanced Alerting**: Implement dynamic alerts with notifications via multiple channels (email, SMS, etc.).
-- **Expanded Assistant**: Enable the AssistantAgent to interact dynamically with other agents on Agentverse for orchestrating complex tasks.
-- **Scalability Enhancements**: Refactor the architecture to support more agents and handle higher loads.
+python3 -m http.server 5500
+Then open http://localhost:5500/index.html in your browser, type a query (e.g., "What is the price of ETH and crypto news?"), and click Send Query.
 
-## Contribution
+Future Improvements
+Multi-Coin Support:
+Enhance the PriceAgent to handle more cryptocurrencies using dynamic queries.
 
-Contributions are welcome! If you have suggestions or improvements, please open an issue or submit a pull request.
+Enhanced Assistant:
+Improve query parsing to handle a wider variety of questions and combine responses more elegantly.
 
-## License
+Real Alerts:
+Implement a real-time alerting mechanism based on live data.
 
+UI/UX Upgrades:
+Upgrade the front end with a modern framework (e.g., React or Vue) for a richer user experience.
+
+Caching & Rate Limiting:
+Add caching to reduce API calls and handle rate limits.
+
+License
 This project is licensed under the MIT License.
----
-
-ChainWatch AI is built for the Fetch.ai Hackathon at Techkriti'25, IIT Kanpur. I appreciate your interest and look forward to your feedback!
-
-https://devpost.com/software/chainwatch-ai?ref_content=my-projects-tab&ref_feature=my_projects
-you are welcome to visit my submission on DevPost where you can watch the demo video!
